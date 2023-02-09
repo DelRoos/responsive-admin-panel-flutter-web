@@ -1,9 +1,11 @@
 import 'package:admin_ui/components/appbarIconItems.dart';
 import 'package:admin_ui/components/barChartComponent.dart';
 import 'package:admin_ui/components/header.dart';
+import 'package:admin_ui/components/historytable.dart';
 import 'package:admin_ui/components/infoCard.dart';
 import 'package:admin_ui/components/payementDetailList.dart';
 import 'package:admin_ui/components/side_menu.dart';
+import 'package:admin_ui/config/responsive.dart';
 import 'package:admin_ui/config/size_config.dart';
 import 'package:admin_ui/style/colors.dart';
 import 'package:admin_ui/style/style.dart';
@@ -11,20 +13,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Dashboard extends StatelessWidget {
-  const Dashboard({super.key});
+  GlobalKey<ScaffoldState> _drawerkey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return Scaffold(
+      key: _drawerkey,
+      appBar: !Responsive.isDesktop(context)
+          ? AppBar(
+              elevation: 0,
+              backgroundColor: AppColors.white,
+              leading: IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  color: Colors.black,
+                ),
+                onPressed: () {
+                  _drawerkey.currentState?.openDrawer();
+                },
+              ),
+              actions: [AppBarIconItems()],
+            )
+          : PreferredSize(
+              child: SizedBox(),
+              preferredSize: Size.zero,
+            ),
+      drawer: SizedBox(
+        width: 100,
+        child: SideMenu(),
+      ),
       body: SafeArea(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 1,
-              child: SideMenu(),
-            ),
+            if (Responsive.isDesktop(context))
+              Expanded(
+                flex: 1,
+                child: SideMenu(),
+              ),
             Expanded(
               flex: 10,
               child: Container(
@@ -36,6 +63,7 @@ class Dashboard extends StatelessWidget {
                     horizontal: 30,
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
                         child: Column(
@@ -75,7 +103,7 @@ class Dashboard extends StatelessWidget {
                               ),
                             ),
                             SizedBox(
-                              height: SizeConfig.blockSizeVertical * 4,
+                              height: SizeConfig.blockSizeVertical * 5,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,37 +141,61 @@ class Dashboard extends StatelessWidget {
                         height: 300,
                         child: BarCharComponent(),
                       ),
+                      SizedBox(
+                        height: SizeConfig.blockSizeVertical * 5,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          PrimaryText(
+                            text: "History",
+                            size: 30,
+                            fontWeight: FontWeight.w800,
+                          ),
+                          PrimaryText(
+                            text: "Transaction of last 6 months",
+                            size: 16,
+                            color: AppColors.secondary,
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: SizeConfig.blockSizeVertical * 3,
+                      ),
+                      HistoryTable(),
+                      if (!Responsive.isDesktop(context)) PayementDetailList(),
                     ],
                   ),
                 ),
               ),
             ),
-            Expanded(
-              flex: 4,
-              child: Container(
-                width: double.infinity,
-                height: SizeConfig.screenHeight,
-                color: AppColors.secondaryBg,
-                padding: EdgeInsets.symmetric(
-                  vertical: 30,
-                  horizontal: 30,
-                ),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 30,
-                    ),
-                    child: Column(
-                      children: [
-                        AppBarIconItems(),
-                        PayementDetailList(),
-                      ],
+            if (Responsive.isDesktop(context))
+              Expanded(
+                flex: 4,
+                child: Container(
+                  width: double.infinity,
+                  height: SizeConfig.screenHeight,
+                  color: AppColors.secondaryBg,
+                  padding: EdgeInsets.symmetric(
+                    vertical: 30,
+                    horizontal: 30,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 30,
+                      ),
+                      child: Column(
+                        children: [
+                          AppBarIconItems(),
+                          PayementDetailList(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
